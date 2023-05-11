@@ -281,7 +281,7 @@ Tip: If you don't need this Virtual Machine anymore, you can decommission it usi
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/maroskukan/hypervisor-cookbook/main/hyperv/scripts/vm_delete.ps1" `
                   -OutFile "vm_delete.ps1"
 
-# Execute the script, update isoPath according your environment
+# Execute the script
 .\vm_delete.ps1 -Name rhel01
 ```
 
