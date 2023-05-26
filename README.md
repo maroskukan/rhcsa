@@ -476,7 +476,7 @@ Dismount-DiskImage -ImagePath "D:\iso\rhel-9.2-x86_64-dvd.iso"
 
 As an administrator, knowing how to effectively manage software in Linux is crucial. This skill involves installing, updating, and removing packages.
 
-Why is it essential? Firstly, it grants access to a vast range of open-source software, enhancing functionality to meet specific requirements. Regularly updating packages safeguards against vulnerabilities and boosts system performance. 
+Why is it essential? Firstly, it grants access to a vast range of open-source software, enhancing functionality to meet your specific requirements. Regularly updating packages safeguards against vulnerabilities and can boost system performance. 
 
 Managing software also optimizes resources, removes unnecessary components, and enables efficient troubleshooting.
 
@@ -513,7 +513,7 @@ clean          -h             list           refresh        repo-override  statu
 ```
 
 
-RHEL web console also know as the Cockpit project provides a modern way of managing server through an easy to use web console.
+RHEL Web Console also know as the [Cockpit project](https://cockpit-project.org/) provides a modern way of managing server through an easy to use web console.
 
 ![RHEL Web Console Subsciption](/img/smwc_01.png)
 
