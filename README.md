@@ -474,6 +474,15 @@ Dismount-DiskImage -ImagePath "D:\iso\rhel-9.2-x86_64-dvd.iso"
 
 ## Managing software
 
+As an administrator, knowing how to effectively manage software in Linux is crucial. This skill involves installing, updating, and removing packages.
+
+Why is it essential? Firstly, it grants access to a vast range of open-source software, enhancing functionality to meet specific requirements. Regularly updating packages safeguards against vulnerabilities and boosts system performance. 
+
+Managing software also optimizes resources, removes unnecessary components, and enables efficient troubleshooting.
+
+In this article, we are going to take a look at how manage software in Red Hat Enterprise Linux using practical examples.
+
+
 ### System registration
 
 In Red Hat Enterprise Linux, system registration is the process of associating a specific system with a Red Hat account and subscription. It is important because it enables the system to receive software updates, security patches that are provided through the Red Hat Content Delivery Network. 
