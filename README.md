@@ -35,7 +35,7 @@
     - [Repositories](#repositories)
     - [Creating Repositories](#creating-repositories)
       - [Objectives](#objectives)
-      - [Prerequsites](#prerequsites)
+      - [Prerequisites](#prerequisites)
       - [Solution](#solution-2)
     - [Consuming Repositories](#consuming-repositories)
       - [Objectives](#objectives-1)
@@ -559,7 +559,7 @@ Even though this is not a production environment, your coworker, who is responsi
 
 Good Luck.
 
-#### Prerequsites
+#### Prerequisites
 
 The following prerequisites are required before you can continue with the solution:
 
@@ -747,7 +747,7 @@ The `AppStream` repository consists of additional packages (applications, runtim
 
 Now that we have the foundation laid down, let us explore various ways how we can interact with RPM software packages and its database. 
 
-The database-related files are stored in the `/var/lib/rpm/` directory. If you are curious about the database structure, make a copy and explore it using the `sqlite3` tool. You can easily list all defined tables using the query below.
+The database-related files are stored in the `/var/lib/rpm` directory. If you are curious about the database structure, make a copy and explore it using the `sqlite3` tool. You can easily list all defined tables using the query below.
 
 ```bash
 dnf install -y sqlite
@@ -858,7 +858,6 @@ usr
 │           └── httpd.socket
 ├── lib64/
 │   └── httpd/
-
 ```
 
 Another way for listing package content is to use RPM with the following query.
