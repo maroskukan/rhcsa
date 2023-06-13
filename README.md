@@ -5,7 +5,6 @@
     - [Linux](#linux)
     - [Red Hat Enterprise Linux](#red-hat-enterprise-linux)
     - [Red Hat Certified System Administrator](#red-hat-certified-system-administrator)
-  - [Tools and environment](#tools-and-environment)
   - [Getting started](#getting-started)
   - [Subscription and licensing](#subscription-and-licensing)
     - [Red Hat Content Delivery Network](#red-hat-content-delivery-network)
@@ -71,11 +70,9 @@
 
 Linux is a free and open-source operating system based on the Unix operating system. It is highly customizable and has a wide range of software available for it. It is present on a wide range of devices, from supercomputers to appliances and up to tiny IoT sensors. Linux is known for its stability, security, and performance, and thus used by millions of people worldwide. The greatest asset Linux has is its user community. In my opinion, it is worth spending some time learning Linux as it will repay you multiple times across wide range of professions.
 
-
 ### Red Hat Enterprise Linux
 
 Red Hat Enterprise Linux (RHEL) is a popular operating system widely used by businesses and organizations for mission-critical applications and services. RHEL is based on the Linux kernel and is known for its stability, reliability, and security features. It comes with tools and features designed to help organizations manage their IT infrastructure. RHEL is also known for its strong support and enterprise-level technical support services. With recent policy changes in the Red Hat Developer Program, RHEL became great choice for individual developers and small shops. For these reasons, I have selected this distribution as a role model for this article.
-
 
 ### Red Hat Certified System Administrator
 
@@ -83,21 +80,11 @@ RHCSA is a popular certification to acquire because it validates the skills and 
 
 [RHCSA exam objectives](https://www.redhat.com/en/services/training/ex200-red-hat-certified-system-administrator-rhcsa-exam?section=objectives) benefits us by providing an outline of the topics and objectives they need to master to pass the certification exam. It helps us focus their studies on the most important areas, and provides a structured approach to learning. The blueprint also helps us identify areas where they may need additional practice or study. By following the blueprint, we can prepare ourselves more effectively for the RHCSA certification exam and increase our chances of success. For these reasons, I have chosen this certification as a guideline for learning Linux operating system.
 
-
-## Tools and environment
-
-- Hypervisor
-- Vagrant
-- Environments
-- Extras
-
-
 ## Getting started
 
 - Open source
 - Linux distributions
 - Red Hat Enterprise Linux
-
 
 ## Subscription and licensing
 
@@ -108,7 +95,6 @@ Red Hat Content Delivery Network (CDN) is a scalable global distribution platfor
 To access these resources you need to be authenticated. This is accomplished by attaching a subscription through a system registration process managed by Red Hat Subscription Management.
 
 One of the ways how to acquire a valid subscription is to take advantage of Red Hat Developer Program.
-
 
 ### Red Hat Developer Program
 
@@ -128,7 +114,6 @@ After you log in, navigate to subscription management at [https://access.redhat.
 
 Afterwards, you will be welcomed by the main subscription management screen. Here you see a breakdown of available subscriptions, manage systems, and further bugfix, enhancement, and security advisories that affect your registered systems.
 
-
 ### Red Hat Subscription Management
 
 As described previously, the subscription management portal can be accessed at [https://access.redhat.com/management](https://access.redhat.com/management). 
@@ -145,7 +130,6 @@ There are multiple ways how you can organize your subscriptions, including using
 For Red Hat Enterprise Linux there are multiple installation images available at [Product Downloads](https://access.redhat.com/downloads). The main difference between the `Binary DVD` and `Boot ISO` images is that the Binary DVD includes additional packages and is ideal for environments without access to Internet during installation time, therefore is bigger in size. Finally, the `KVM Guest Image` can be used to create virtual machine on a KVM/QEMU hypervisor.
 
 These are all standard installation media provided by Red Hat. If you need to create a custom installation you can leverage the [Image Builder](https://www.redhat.com/en/topics/linux/what-is-an-image-builder) tool.
-
 
 ### Standard installation
 
@@ -188,7 +172,6 @@ The OS specifications are as follows:
 If a setting is not included in above table assume default installer selection. The registration process will be performed using `subscription-manager` after the OS installation finished.
 
 Good luck.
-
 
 #### Solution
 
@@ -515,18 +498,22 @@ Once the installation completes and the virtual machine reboots. Verify from the
 ```powershell
 # From Hyper-V Host, verify that the VM listens on TCP/22 (SSH)
 Test-NetConnection -ComputerName "rhel03.mshome.net" `
-                   -Port 22
+                   -Port 22 `
+                   | Select-Object -Property `
+                   @{Name="ComputerName"; Expression={$_.ComputerName}}, `
+                   @{Name="RemoteAddress"; Expression={$_.RemoteAddress.IPAddressToString}}, `
+                   @{Name="TcpTestSucceeded"; Expression={$_.TcpTestSucceeded}} `
+                   | ConvertTo-Json
 ```
 
 An example of happy output would look like the following.
 
-```powershell
-ComputerName     : rhel03.mshome.net
-RemoteAddress    : 172.19.102.38
-RemotePort       : 22
-InterfaceAlias   : vEthernet (Default Switch)
-SourceAddress    : 172.19.96.1
-TcpTestSucceeded : True
+```json
+{
+  "ComputerName": "rhel03.mshome.net",
+  "RemoteAddress": "172.19.102.38",
+  "TcpTestSucceeded": true
+}
 ```
 
 In summary, we addressed all requirements received from our colleague. When done exploring the environment, we can clean up by removing the `rhel03` virtual machine.
@@ -758,33 +745,33 @@ After a few minutes, perform a simple connection test targeting SSH.
 # From Hyper-V Host, verify if VMs listen on TCP/22 (SSH)
 foreach ($vmName in $vmNames) {
   Test-NetConnection -ComputerName "$vmName.mshome.net" `
-                     -Port 22
+                     -Port 22 `
+                     | Select-Object -Property `
+                     @{Name="ComputerName"; Expression={$_.ComputerName}}, `
+                     @{Name="RemoteAddress"; Expression={$_.RemoteAddress.IPAddressToString}}, `
+                     @{Name="TcpTestSucceeded"; Expression={$_.TcpTestSucceeded}} `
+                     | ConvertTo-Json
 }
 ```
 
 An example of happy output would look like the following:
 
-```powershell
-ComputerName     : kvm01.mshome.net
-RemoteAddress    : 172.19.108.188
-RemotePort       : 22
-InterfaceAlias   : vEthernet (Default Switch)
-SourceAddress    : 172.19.96.1
-TcpTestSucceeded : True
-
-ComputerName     : kvm02.mshome.net
-RemoteAddress    : 172.19.104.7
-RemotePort       : 22
-InterfaceAlias   : vEthernet (Default Switch)
-SourceAddress    : 172.19.96.1
-TcpTestSucceeded : True
-
-ComputerName     : kvm03.mshome.net
-RemoteAddress    : 172.19.97.83
-RemotePort       : 22
-InterfaceAlias   : vEthernet (Default Switch)
-SourceAddress    : 172.19.96.1
-TcpTestSucceeded : True
+```json
+{
+  "ComputerName": "kvm01.mshome.net",
+  "RemoteAddress": "172.19.108.188",
+  "TcpTestSucceeded": true
+}
+{
+  "ComputerName": "kvm02.mshome.net",
+  "RemoteAddress": "172.19.104.7",
+  "TcpTestSucceeded": true
+}
+{
+  "ComputerName": "kvm03.mshome.net",
+  "RemoteAddress": "172.19.97.83",
+  "TcpTestSucceeded": true
+}
 ```
 
 In summary, we addressed all requirements received from our colleague. When done exploring the environment, we can clean up by removing the three new virtual machine.
