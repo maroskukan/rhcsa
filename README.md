@@ -29,6 +29,24 @@
       - [Prerequisites](#prerequisites-1)
       - [Solution](#solution-2)
   - [Work with command line](#work-with-command-line)
+    - [Foreword](#foreword-1)
+    - [Command Line](#command-line)
+    - [Shell](#shell)
+    - [Terminal](#terminal)
+    - [Bash](#bash)
+    - [Built-in commands](#built-in-commands)
+    - [Default Streams](#default-streams)
+    - [History](#history)
+    - [Shortcuts](#shortcuts)
+    - [Substitution](#substitution)
+    - [Globbing](#globbing)
+    - [Variables](#variables)
+    - [Functions](#functions)
+    - [Conditionals](#conditionals)
+    - [Loops](#loops)
+    - [Coreutils](#coreutils)
+    - [Useful tools](#useful-tools)
+    - [Closing thoughs](#closing-thoughs)
   - [Manage files and folders](#manage-files-and-folders)
   - [Getting help](#getting-help)
   - [Edit text files](#edit-text-files)
@@ -786,13 +804,430 @@ And with, we are at the end of this article. I hope you had a great time reading
 
 ## Work with command line
 
-- Understanding TTYs
-- Accessing CLI from GUI
-- Globbing
-- STDIN, STDOUT, STDERR
-- Redirection
-- Coreutils
-- Useful tools (grep,tmux,jq,dasel)
+### Foreword
+
+Make each program do one thing well. To do a new job, build afresh rather than complicate old programs by adding new "features"
+-- Bell System Technical Journal
+
+Welcome to an exciting journey into the world of Linux command line interface! Whether you are a seasoned system administrator or just starting as a DevOps engineer, mastering the bash shell opens up a realm of possibilities. In this article, we will delve into the essential techniques and best practices for interacting with the command line and explore Bash features in depth. Equipped with this knowledge, you are on the right path to streamlining your administrative tasks and unleashing the true power of Linux. Let’s dive in!
+
+### Command Line
+
+A command line serves as a text-based interface through which we give instructions to a computer system. In Linux, this command line is provided by a program known as the `shell`. Over time various shell program variants have been developed , offering different features and functionalities.
+
+### Shell
+
+A shell is a program that interprets and executes commands entered by the user. It serves as a command-line interface, providing a way to interact with the operating system. The shell takes user input, interprets the commands, and communicates with the operating system to execute them.
+
+In Red Hat Enterprise Linux (RHEL) and many other popular Linux distributions, the GNU Bourne-Again Shell (bash) is configured as the default user shell. Bash is an enhanced iteration of the original Bourne Shell (sh) found in UNIX systems, incorporating improvements and additional features.
+
+Tip: List of available shells is listed in /etc/shells file. We can change our default shell using chsh utility which is part of util-linux-user package.
+
+When a shell waits for our input, it presents a string known as the shell prompt. For regular users, the shell prompt includes a concluding dollar ($) character.
+
+```bash
+[user@host ~]$
+```
+
+When the shell is running as the superuser, root, the hash (`#`) character replaces the dollar (`$`) character. This alteration serves as an indicator of a superuser shell, acting as a safeguard against potential mistakes that could impact the entire system.
+
+```bash
+[root@host ~]#
+```
+
+Leveraging bash for command execution offers immense power. With its built-in scripting language, the bash shell empowers task automation. It equips users with capabilities that enable and simplify complex operations, particularly those challenging to achieve efficiently using graphical tools, especially at scale.
+
+Tip: There are several alternatives to the bash shell, each with its features and syntax. Some popular include [Zsh](https://zsh.sourceforge.io/), [Fish](https://fishshell.com/), and [PowerShell](https://github.com/PowerShell/PowerShell).
+
+### Terminal
+
+Terminal is a software application that provides a user interface to interact with the shell. It provides a window or console where users can enter commands and receive output from the shell. The terminal acts as an intermediary between the user and the shell, displaying the shell prompt and facilitating the exchange of commands and results.
+
+A terminal can provide the following ways to access the shell:
+
+**Physical Console**. Accessed with directly connected hardware keyboard and display. It can provide access to Virtual Console(s) also known as TTYs. By default, these are accessed using `CTRL + ALT` and a function key (`F1` through `F6`).
+
+**Terminal Emulators**: Software applications mimicking a console interface.
+
+**Graphical Login Prompt**: Login to a graphical environment and open a terminal program such as GNOME Terminal or Konsole.
+
+**Remote Access**: Connect to a remote computer using SSH.
+
+As it is impossible to cover every possible way how to interact with the system using cli, we will focus the remainder of this article on Bash shell which we access from GUI as well as remotely using SSH.
+
+### Bash
+
+As stated earlier, Bash is an enhanced iteration of the original Bourne Shell (sh). It was developed and released by Brian Fox in 1989 for the GNU Project. It introduced several features and improvements compared to the original Bourne Shell. These include command history, tab completion, command line editing, shell variables and functions, improved job control, conditional constructs, arithmetic operations, and more. No wonder why it became so popular.
+
+To explore bash capabilities, we start by downloading a sample Vagrantfile, which includes a definition of a single client system running Red Hat Enterprise Linux 9.
+
+📝Note: The following section assumes that you have completed the Hyper-V and Vagrant setup. These and many other tools are presented in the article Increase Your Output: Essential Tools Every Developer Needs!.
+
+```powershell
+# Download the Vagrantfile
+$url = "https://raw.githubusercontent.com/maroskukan/rhcsa/main/Vagrantfiles/env1/Vagrantfile"
+Invoke-WebRequest -Uri $url -OutFile Vagrantfile
+
+# Start the Instance
+vagrant up
+
+# Connect to the Instance
+vagrant ssh
+```
+
+You will land in shell as regular user `vagrant`. This is our starting point.
+
+Note: The Vagrantfile template uses the `generic/rhel9` box. To keep the box file small as possible, it was installed with a minimal set of [packages](https://github.com/lavabit/robox/blob/d9bfb6bf8845e629f6d304519d9b37cb1cbe8eb9/http/generic.rhel9.vagrant.ks#LL22C10-L22C10) in mind. Therefore, to use GUI to access the shell, you need to register your system first and then install the `@gnome-desktop` package group.
+
+We can use the `tty` command to quickly determine which terminal device has been assigned to this SSH session. In the output below, we can observe that the very first pseudo-terminal slave was assigned to our remote login session.
+
+```bash
+/dev/pts/0
+```
+
+Knowing which pseudo-terminal slave (pts) has been assigned to a user can provide several benefits, including interacting with user sessions, sending messages or notifications, monitoring user activity, and troubleshooting.
+
+In the next section, we dive deeper into bash features and capabilities.
+
+### Built-in commands
+
+We start with bash built-in commands, These are built directly into the Bash shell. They provide the shell's core functionality and are available without the need for external programs or utilities. Bash built-ins provide essential functionality for working with the shell, managing the environment, and performing common operations. These built-in commands are usually faster and more efficient than external commands because they are executed directly within the shell's process.
+
+They include commands for file and directory manipulation, variable manipulation, I/O operations, control flow, and more. Bash built-ins enhance the overall usability and power of the shell, making it a versatile and powerful tool for scripting and interactive shell sessions. For example:
+
+File and directory manipulation.
+
+```bash
+cd /path/to/directory           # Change directory
+mkdir new_directory             # Create a new directory
+rm file.txt                     # Remove a file
+cp file.txt destination         # Copy a file to a destination
+mv file.txt new_name            # Move/rename a file
+```
+
+Variable manipulation.
+
+```bash
+variable="Hello, World!"        # Assign a value to a variable
+echo $variable                  # Print the value of a variable
+length=${#variable}             # Get the length of a string
+```
+
+I/O operations.
+
+```bash
+echo "Hello, World!"             # Print a string to the terminal
+read -p "Enter your name: " name # Read input from the user
+```
+
+You can use the `type` command in the shell to determine if a command is a shell built-in or an external program. For example:
+
+```bash
+type cd
+cd is a shell builtin
+
+type cat
+cat is /usr/bin/cat
+```
+
+Besides built-in commands many programs and utilities come from [GNU Core Utilities](https://www.gnu.org/software/coreutils/) (Coreutils). These are described later in this article.
+
+### Default Streams
+
+In shell programming, the default streams (`stdin`, `stdout`, and `stderr`) handle input, output, and error messages. These streams are necessary for command-line interaction, displaying results, and communicating errors.
+
+```bash
+# Search for files changed in the last hour and save the results to 'changed.txt'
+# redirect any errors to sink hole
+find / -type f -mmin -60 > changed.txt 2>/dev/null
+```
+
+Streams allow for the redirection of output from one program to serve as input for another using unnamed pipes. Unnamed pipes enable the seamless flow of data between commands, improving efficiency and enabling complex data processing workflows.
+
+```bash
+# Count the number of lines containing "error" in a log file
+cat logfile.txt | grep "error" | wc -l
+```
+
+Additionally, named pipes, also known as FIFOs, provide a practical way to establish communication between different processes or even across systems. Named pipes act as special files that allow for inter-process communication, facilitating the exchange of data in a similar manner to unnamed pipes, but with more flexibility and persistence.
+
+```bash
+# Create a named pipe
+mkfifo mypipe
+
+# In one terminal, write data into the named pipe
+echo "Hello, World!" > mypipe
+
+# In another terminal, read data from the named pipe
+cat < mypipe
+```
+
+Tip: There are several other options for inter-process communication. These include signals, shared memory, message queues, semaphores, and sockets.
+
+Exit codes, another crucial aspect, are numeric values returned by commands upon completion. They provide information about the success or failure of a command's execution. Exit codes can be practically used in shell scripts to make decisions based on the outcome of a command. For example, conditional statements can be used to take different actions depending on whether a command succeeded or encountered an error. This allows for robust error handling and automation of tasks based on command execution outcomes.
+
+```bash
+# Check if a file exists and take action based on the result
+if [ -f myfile.txt ]; then
+    echo "File exists."
+else
+    echo "File does not exist."
+fi
+```
+
+💡Tip: After command execution the exit code (status) is captured in $? variable.
+
+In Bash, the `||` and `&&` operators are used for conditional execution of commands based on the success or failure of previous commands.
+
+The `||` operator, also known as the OR operator, allows you to specify a command to be executed only if the previous command fails (returns a non-zero exit status). It is typically used for error handling or fallback actions. If the preceding command fails, the command following || will be executed. However, if the preceding command succeeds, the command following || will be skipped.
+
+```bash
+# Check if a directory exists, and create it if it doesn't
+mkdir my_directory && echo "Directory created." || echo "Failed to create directory."
+
+# Install a package using a package manager, and display a success message or error message
+dnf install httpd && echo "Package installed." || echo "Failed to install package."
+```
+
+### History
+
+The history feature allows us to recall and reuse previously executed commands. By default, Bash saves the command history in a file called `~/.bash_history`. This file contains a list of commands executed in previous sessions. The size of the history list is typically set to a default value, such as 500 or 1000 commands.
+
+To view the command history, you can type the "history" command in the shell. It will display a numbered list of commands along with their execution order. You can recall a command by using its history number with the `!` symbol. For example, `!10` will execute the 10th command in the history list.
+
+```bash
+# View the command history
+history
+
+# Execute a command from history by its number
+!5
+
+# Use the history expansion to repeat the last command
+!!
+
+# Search for a specific command in history
+Ctrl+R
+```
+
+To temporarily disable history in Bash and prevent sensitive information from being recorded, you can use the "set" command to modify the "HISTFILE" variable. Here's an example:
+
+```bash
+# Disable history temporarily
+unset HISTFILE
+
+# Enter sensitive information here
+echo "Do not include this in history"
+
+# Enable history again
+export HISTFILE=~/.bash_history
+```
+
+### Shortcuts
+
+Keyboard shortcuts provide a convenient way to increase productivity and efficiency when working with the command line interface. They allow you to perform common tasks and navigate through commands and text more quickly. 
+
+Below is a list of the most useful day-to-day keyboard shortcuts:
+
+`Ctrl+L`: Clears the screen, similar to the "clear" command.
+`Ctrl+A`: Moves the cursor to the beginning of the line.
+`Ctrl+E`: Moves the cursor to the end of the line.
+`Ctrl+R`: Initiates a reverse search through the command history.
+
+For working with processes these shortcuts are usefull.
+
+`Ctrl+C`: Interrupts the currently running command or process.
+`Ctrl+D`: Sends an end-of-file (EOF) signal, indicating the end of input or exiting the shell.
+`Ctrl+Z`: Suspends the currently running process and puts it in the background.
+
+And finally, we need to mention `Tab`, which auto-completes commands, file names, and directories.
+
+Tip: In order to fully take advantage of Tab completion, make sure you have the `bash-completion` package installed.
+
+Another useful shortcut for quickly replacing a word or phase in the previous command and re-execute it is `^^`. For example
+
+```bash
+# Check web server status
+systemctl status httpd
+
+# Below shortcut starts httpd
+^status^start
+```
+
+### Substitution
+
+Substitution is a mechanism in Bash that allows you to capture the output of a command and use it as part of another command or store it in a variable. It provides a way to dynamically incorporate command output into shell scripts or command-line operations.
+
+There are two forms of command substitution in Bash: using backticks (``command``) and the `$()` syntax ($(command)).
+
+Backticks (command): Backticks were the traditional way of performing command substitution in older versions of Bash. When a command is enclosed in backticks, it is executed, and the output is substituted into the command or assigned to a variable. However, backticks can be less readable, especially when nested or used within complex commands.
+
+```bash
+serial=`cat /sys/class/dmi/id/board_serial`
+echo $serial
+```
+
+$() syntax ($(command)): The $() syntax is the preferred and more modern way of performing command substitution. It has become the standard method due to its improved readability and ease of use, especially in complex scenarios or nested commands.
+
+```bash
+serial=$(cat /sys/class/dmi/id/board_serial)
+echo $serial
+```
+
+Both forms achieve the same result of capturing the output of a command. However, the $() syntax is generally preferred for code clarity and easier command nesting.
+
+
+### Globbing
+
+Globbing is a feature that allows you to match and expand file or directory names using wildcard characters. The most commonly used wildcard characters are `*` (matches any sequence of characters), `?` (matches any single character), and `[...]` (matches any single character within the specified range or set).
+
+```bash
+# Create three new files: file1.txt, file2.txt, file3.txt
+touch file{1..3}.txt
+
+# List only file1.txt and file2.txt
+ls file[1-2].txt
+```
+
+Brace expansion is a feature that allows you to generate multiple strings or sequences by specifying a pattern enclosed within curly braces `{}`. It provides a concise way to generate and manipulate lists of strings.
+
+```bash
+# Create a backup of the bashrc file with the current date
+cp ~/.bashrc{,$(date +%Y-%m-%d)}
+```
+
+### Variables
+
+Variables store and manipulate data. They are case-sensitive and consist of letters, digits, and underscores. Assign values without spaces, like variable_name=value. Variables can store strings, numbers, and arrays, providing flexibility in scripts. Access them with $variable_name.
+
+```bash
+# Assigning simple variables
+name="Bash"
+age=33
+country="USA"
+
+# List
+distros=("ubuntu" "fedora" "arch")
+
+# Array
+numbers=(1 2 3 4 5)
+
+# Accessing and printing variable values
+echo "Name: $name"
+echo "Age: $age"
+echo "Country: $country"
+
+# Accessing and printing list elements
+echo "Distributions: ${distros[@]}"
+```
+
+Besides user-defined variables, there are some well know reserved variables such as:
+
+### Functions
+
+Functions are used to group commands and give them a name. They improve code organization and reusability. They can accept arguments and return values. By defining functions, we can modularize our script, make it more readable, and easily reuse code.
+
+```bash
+# Define a function named "greet"
+greet() {
+    name="$1"
+    echo "Hello, $name!"
+}
+
+# Call the function and pass an argument
+greet "Maros"
+```
+
+### Conditionals
+
+Conditionals in Bash, such as `if` statements and `case` statements, allow for making decisions and executing code based on specific conditions. They are used to control the flow of the script and enable dynamic and responsive behavior.
+
+```bash
+current_day=$(date +%A)
+
+if [[ $current_day == "Saturday" || $current_day == "Sunday" ]]; then
+    echo "It's the weekend. Writing time!"
+else
+    echo "It's a workday. Project time!"
+fi
+```
+
+```bash
+source /etc/os-release
+
+case $ID in
+    ubuntu)
+        echo "This is Ubuntu."
+        ;;
+    fedora)
+        echo "This is Fedora."
+        ;;
+    arch)
+        echo "This is Arch Linux."
+        ;;
+    *)
+        echo "Unknown distribution."
+        ;;
+esac
+```
+
+### Loops
+
+Loops in Bash allow for repetitive tasks and iterating over values. Types of loops include `for`, `while`, and `until`. The `for` loop iterates over a sequence of values. The `while` loop repeats commands as long as a condition is true. The `until` loop continues until a condition becomes true. Loops automate tasks and process data, providing flexibility and control in script development.
+
+```bash
+servers=("server1" "server2" "server3")
+for server in "${servers[@]}"; do
+    echo "Checking status of $server"
+    ssh "$server" systemctl status service
+done
+```
+
+```bash
+counter=0
+
+while [ $counter -lt 5 ]; do
+    echo "Performing system check..."
+    counter=$((counter + 1))
+    sleep 1
+done
+
+echo "System check completed."
+```
+
+```bash
+until systemctl is-active --quiet httpd; do
+    echo "Waiting for service to start..."
+    sleep 5
+done
+echo "Service is now active!"
+```
+
+### Coreutils
+
+GNU Core Utilities, or Coreutils, are essential command-line tools for Unix-like systems. Developed by the GNU Project, they provide a wide range of functionalities for file and directory management, text processing, and system operations. From basic operations like copying and moving files to advanced tasks like searching and manipulating file content.
+
+Coreutils offer reliable and efficient solutions. These tools, such as `ls`, `cp`, `rm`, and `cat`, are widely used for their consistency and compatibility across different platforms, making them indispensable for effective command-line usage.
+
+### Useful tools
+
+[Exa](https://github.com/ogham/exa) is a modern replacement for the "ls" command in Linux and Unix-like systems. It provides a visually appealing and customizable interface for listing directory contents. With features like color-coding, different viewing modes, and additional functionalities such as filtering and sorting, Exa enhances the file listing experience in the command line. It offers improved readability and ease of use, making it a popular tool for users working with the command line.
+
+[Bat](https://github.com/sharkdp/bat) is a command-line tool that serves as a replacement for the "cat" command in Linux and Unix-like systems. It provides syntax highlighting and other additional features, making it more versatile and user-friendly compared to the traditional "cat" command. Bat supports a wide range of file types and formats, allowing users to view file contents with syntax highlighting for improved readability. It also includes features like line numbering, Git integration, and paging, making it a powerful tool for working with text files in the command line. With its enhanced functionality and aesthetics, Bat offers a more pleasant and productive experience when viewing file contents on the command line.
+
+[Tmux](https://github.com/tmux/tmux/wiki) is a terminal multiplexer that allows users to create and manage multiple terminal sessions within a single window. It enhances productivity and efficiency by enabling users to switch between different sessions, split the window into panes, and run multiple commands simultaneously. Tmux provides a customizable and scriptable environment, allowing users to create and save layouts, detach and reattach sessions, and share sessions with other users. It also supports session logging, copy-pasting between panes, and various window management features. Tmux is a valuable tool for developers, system administrators, and power users who work extensively in the command line, as it simplifies multitasking and organization of terminal sessions, leading to a more streamlined and productive workflow.
+
+[JC](https://github.com/kellyjonbrazil/jc) is known as JSON Convert is modern tool which can JSONify output of many CLI tools, file-types and common strings for parsing purposes. It is module and extendable through the use of parsers. It is available as a binary or package for common Linux distributions as well pip package.
+
+[JQ](https://github.com/jqlang/jq) is a versatile command-line tool for JSON data manipulation. It offers a powerful query language and a wide range of operations to extract, filter, and transform JSON structures. JQ's concise syntax and functional programming-inspired approach make it a preferred choice for working with complex JSON data. It is widely used by developers, sysadmins, and data engineers for tasks like data extraction, transformation, and JSON processing pipelines. With JQ, you can efficiently process JSON data from the command line, script data workflows, and integrate it into automation and data processing pipelines.
+
+[Dasel](https://github.com/TomWright/dasel) is a command-line tool that allows you to query and modify data in various formats, including JSON, YAML, TOML, and XML. It provides a simple syntax inspired by CSS selectors for extracting, filtering, and transforming data. With Dasel, you can easily navigate hierarchical data structures, perform operations like updating and deleting data, and format the output. It's a versatile tool for tasks such as data extraction, configuration management, and automation.
+
+
+
+### Closing thoughs
+
+In conclusion, working with the command line in Linux provides a powerful and efficient means of interacting with the system. It offers flexibility, speed, and fine-grained control over various tasks, enabling users to perform complex operations, automate processes, and gain a deeper understanding of their system. While there may be a learning curve, the benefits of the command line far outweigh the initial challenges. I encourage further discussion in the comments section to share experiences, and tips, and explore the vast potential of the command line in the Linux ecosystem. Let's dive in, embrace the command line, and unlock a world of possibilities in our Linux journey.
+
 
 
 ## Manage files and folders
@@ -1665,9 +2100,3 @@ rpm(8), rpm2cpio(8), cpio(1), rpmkeys(8)
 - Manage container storage
 - Manage container networking
 - Manage containers as services
-
-
-
-
-...jason's list
-...productivity tools
